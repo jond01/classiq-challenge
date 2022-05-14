@@ -1,0 +1,4 @@
+jupyterlab == 3.4.2
+
+# For Q#:
+qsharp == 0.24.208024
