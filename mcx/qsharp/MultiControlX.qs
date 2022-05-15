@@ -4,15 +4,19 @@ namespace ClassiqChallenge {
 
     // Programs for the MCX gate
 
-    operation MultiControlledX(controlRegister : Qubit[], target : Qubit) : Unit is Adj + Ctl {
+    operation MultiControlledX(ctrlRegister : Qubit[], target : Qubit) : Unit is Adj + Ctl {
         // Simple implementation of the Multi-Controlled X gate
-        Controlled X(controlRegister, target);
+        Controlled X(ctrlRegister, target);
     }
     
     @EntryPoint()
     operation ApplyMultiControlledX(initControl : Bool, initTarget : Bool) : Result {
-        let controlRegisterSize = 14;
-        use (controlRegister, target) = (Qubit[controlRegisterSize], Qubit());
+        let ctrlRegisterSize = 14;
+        let auxRegisterSize = 5;
+        // Allocate the qubits. The auxiliary qubits `auxRegister` are currently unused.
+        use (ctrlRegister, target, auxRegister) = (
+            Qubit[ctrlRegisterSize], Qubit(), Qubit[auxRegisterSize]
+        );
         if initTarget {
             X(target);
         }
@@ -20,11 +24,11 @@ namespace ClassiqChallenge {
         // qubits clean (free back to zero)
         within {
             if initControl {
-                ApplyToEachCA(X, controlRegister);
+                ApplyToEachCA(X, ctrlRegister);
             }
         }
         apply {
-            MultiControlledX(controlRegister, target);
+            MultiControlledX(ctrlRegister, target);
         }
         return M(target);
     }
