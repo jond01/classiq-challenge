@@ -727,7 +727,7 @@ entry:
   %qubits = call %Array* @__quantum__rt__qubit_allocate_array(i64 %numQubits)
   call void @__quantum__rt__array_update_alias_count(%Array* %qubits, i32 1)
   %0 = load i2, i2* @PauliZ, align 1
-  %pauliArr = call %Array* @Microsoft__Quantum__Arrays___997895dbf15045249c5bd3caf802fa22_ConstantArray__body(i64 %numQubits, i2 %0)
+  %pauliArr = call %Array* @Microsoft__Quantum__Arrays___2dfb3135ac4b48e687c8d186741ccf79_ConstantArray__body(i64 %numQubits, i2 %0)
   call void @__quantum__rt__array_update_alias_count(%Array* %pauliArr, i32 1)
   %1 = call double @Microsoft__Quantum__Math__PI__body()
   %theta = fdiv double %1, 2.000000e+00
@@ -787,7 +787,7 @@ declare %Array* @__quantum__rt__qubit_allocate_array(i64)
 
 declare void @__quantum__rt__qubit_release_array(%Array*)
 
-define internal %Array* @Microsoft__Quantum__Arrays___997895dbf15045249c5bd3caf802fa22_ConstantArray__body(i64 %length, i2 %value) {
+define internal %Array* @Microsoft__Quantum__Arrays___2dfb3135ac4b48e687c8d186741ccf79_ConstantArray__body(i64 %length, i2 %value) {
 entry:
   %0 = call %Array* @__quantum__rt__array_create_1d(i32 1, i64 %length)
   %1 = sub i64 %length, 1

@@ -45,8 +45,8 @@ namespace TestExp {
     }
 
     @EntryPoint()
-    operation TestMyExpZ(numQubits : Int) : Unit {
-        // let numQubits = 17;
+    operation TestMyExpZ() : Unit {
+        let numQubits = 4;
         use qubits = Qubit[numQubits];
         let pauliArr = ConstantArray<Pauli>(numQubits, PauliZ);
         let theta = PI() / 2.0;
@@ -63,8 +63,6 @@ namespace TestExp {
                 MyExpZ(theta, qubits);
             }
         }
-        // let res = M(qubits[idx0]);
-        // return res;
         let expected = Zero;
         AssertQubit(expected, qubits[idx0]);
         ResetAll(qubits);
