@@ -1,6 +1,8 @@
 namespace ClassiqChallenge {
     open Microsoft.Quantum.Intrinsic;
     open Microsoft.Quantum.Canon;
+    open Microsoft.Quantum.Convert;
+    open Microsoft.Quantum.Diagnostics;
 
     // Programs for the MCX gate
 
@@ -9,8 +11,11 @@ namespace ClassiqChallenge {
         // Simple implementation of the Multi-Controlled X gate
         Controlled X(controlRegister, target);
     }
-    
-    @EntryPoint()
+
+    internal function XOR(a : Bool, b : Bool) : Bool {
+        return (a and not b) or (b and not a);
+    }
+
     operation ApplyMultiControlledX(initControl : Bool, initTarget : Bool) :
     Result {
         let controlRegisterSize = 14;
@@ -30,6 +35,10 @@ namespace ClassiqChallenge {
         apply {
             MultiControlledX(controlRegister, target);
         }
+
+        let expectedResult = BoolAsResult(XOR(initControl, initTarget));
+        AssertQubit(expectedResult, target);
+
         return M(target);
     }
 
