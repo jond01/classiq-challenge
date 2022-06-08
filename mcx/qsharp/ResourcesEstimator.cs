@@ -2,7 +2,7 @@ using System;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Microsoft.Quantum.Simulation.Simulators.QCTraceSimulators;
-using ClassiqChallenge;
+using TestTraceSimulator;
 
 namespace host
 {
@@ -12,31 +12,28 @@ namespace host
 
         // See:
         // https://docs.microsoft.com/en-us/dotnet/api/microsoft.quantum.simulation.simulators.qctracesimulators.qctracesimulatorconfiguration
-        static QCTraceSimulatorConfiguration GetConfig()
+        static QCTraceSimulatorConfiguration GetConfig(bool tDepth = false)
         {
             var config = new QCTraceSimulatorConfiguration();
             config.UseWidthCounter = true;
             config.UseDepthCounter = true;
 
-            // Optimize for using less qubits
-            config.OptimizeDepth = false;
+            // Optimize for minimal depth
+            config.OptimizeDepth = true;
 
             // Configure depth counting:
             // Count every relevant primitive in the depth metric.
             // By default only T primitives are counted, i.e. the depth is T-depth.
-            foreach (var primitive in new List<PrimitiveOperationsGroups>{
-                PrimitiveOperationsGroups.CNOT,
-                PrimitiveOperationsGroups.QubitClifford,
-                PrimitiveOperationsGroups.R,
-                PrimitiveOperationsGroups.T,
-                }
-            )
+            if (!tDepth)
             {
-                config.TraceGateTimes[primitive] = DefaultPrimitiveDepth;
+                foreach (var primitive in Enum.GetNames<PrimitiveOperationsGroups>())
+                {
+                    config.TraceGateTimes[Enum.Parse<PrimitiveOperationsGroups>(primitive)] =
+                    DefaultPrimitiveDepth;
+                }
             }
-            // Do not count measurements - they are only helpers in this case.
-            config.TraceGateTimes[PrimitiveOperationsGroups.Measure] = 0;
 
+            Console.WriteLine("Primitives depth:");
             foreach (var kvp in config.TraceGateTimes)
             {
                 Console.WriteLine(kvp);
@@ -48,17 +45,29 @@ namespace host
         // https://docs.microsoft.com/en-us/azure/quantum/machines/qc-trace-simulator/width-counter
         static async Task Main(string[] args)
         {
-            var sim = new QCTraceSimulator(GetConfig());
+            var tDepth = false;
 
-            var singleQubitResult = await ApplyMultiControlledX.Run(
-                sim, initControl: false, initTarget: false
+            if (args.Length > 0)
+            {
+                tDepth = args[0] == "--t-depth";
+            }
+
+            var config = GetConfig(tDepth: tDepth);
+            var simOriginal = new QCTraceSimulator(config);
+            var simNonOriginal = new QCTraceSimulator(config);
+
+            await Task.WhenAll(
+                TestCCNOT.Run(simOriginal, original: true),
+                TestCCNOT.Run(simNonOriginal, original: false)
             );
 
-            double width = sim.GetMetric<ApplyMultiControlledX>(MetricsNames.WidthCounter.ExtraWidth);
-            double depth = sim.GetMetric<ApplyMultiControlledX>(MetricsNames.DepthCounter.Depth);
-
-            Console.WriteLine($"Single qubit result: {singleQubitResult}");
-            Console.WriteLine($"Width: {width}, Depth: {depth}.");
+            foreach (var sim in new List<QCTraceSimulator> { simOriginal, simNonOriginal })
+            {
+                double depth = sim.GetMetric<TestCCNOT>(MetricsNames.DepthCounter.Depth);
+                double width = sim.GetMetric<TestCCNOT>(MetricsNames.WidthCounter.ExtraWidth);
+                Console.WriteLine(sim.Name);
+                Console.WriteLine($"Depth: {depth}, width: {width}.");
+            }
         }
     }
 }
