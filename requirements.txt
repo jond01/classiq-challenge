@@ -1,4 +1,4 @@
-jupyterlab == 3.4.2
+jupyterlab == 3.6.7
 
 # For Q#:
 qsharp == 0.24.208024
